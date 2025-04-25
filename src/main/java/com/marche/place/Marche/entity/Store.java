@@ -1,3 +1,4 @@
+// Store.java
 package com.marche.place.Marche.entity;
 
 import jakarta.persistence.*;
@@ -18,16 +19,27 @@ public class Store {
     @Column(nullable = false)
     private String title;
 
-    @Lob
+    @Column(length = 1000)
     private String description;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @Column(nullable = false)
+    private Boolean active = true;  // Ajouter cet attribut
+
+    @ManyToOne
     @JoinColumn(name = "vendor_id", nullable = false)
     private User vendor;
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL)
     private List<Product> products = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }

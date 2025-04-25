@@ -2,6 +2,7 @@ package com.marche.place.Marche.service;
 
 import com.marche.place.Marche.dto.UserDto;
 import com.marche.place.Marche.entity.User;
+import com.marche.place.Marche.enums.UserRole;
 import com.marche.place.Marche.exception.ConflictException;
 import com.marche.place.Marche.exception.ResourceNotFoundException;
 import com.marche.place.Marche.repository.UserRepository;
@@ -9,9 +10,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
-import java.util.List;   // ✅ Correct
-import java.util.stream.Collectors; // ✅ Ajoute cet import pour Collectors
-
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +20,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    // UserService.java
     public UserDto createUser(UserDto dto) {
         if(userRepository.existsByEmail(dto.getEmail())) {
             throw new ConflictException("Email déjà utilisé");
@@ -30,12 +31,14 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(generateSimpleHash(dto.getPassword()));
         user.setPhone(dto.getPhone());
-        user.setRole(dto.getRole());
+
+        // Si aucun rôle n'est spécifié, définir Client par défaut
+        user.setRole(dto.getRole() != null ? dto.getRole() : UserRole.Client);
+        user.setAddress(dto.getAddress());
 
         return convertToDto(userRepository.save(user));
     }
 
-    // Méthode de hachage temporaire
     private String generateSimpleHash(String password) {
         return UUID.nameUUIDFromBytes(password.getBytes()).toString();
     }
@@ -45,6 +48,7 @@ public class UserService {
                 .orElseThrow(() -> new ResourceNotFoundException("Utilisateur non trouvé"));
         return convertToDto(user);
     }
+
     public List<UserDto> getAllUsers() {
         return userRepository.findAll().stream()
                 .map(this::convertToDto)
@@ -57,11 +61,19 @@ public class UserService {
 
         user.setFullName(dto.getFullName());
         user.setPhone(dto.getPhone());
+        user.setAddress(dto.getAddress());
         if(dto.getPassword() != null) {
             user.setPassword(generateSimpleHash(dto.getPassword()));
         }
 
         return convertToDto(userRepository.save(user));
+    }
+
+    public void deleteUser(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Utilisateur non trouvé");
+        }
+        userRepository.deleteById(id);
     }
 
     private UserDto convertToDto(User user) {
@@ -70,7 +82,9 @@ public class UserService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .phone(user.getPhone())
+                .address(user.getAddress())
                 .role(user.getRole())
+                .createdAt(user.getCreatedAt())
                 .build();
     }
 }

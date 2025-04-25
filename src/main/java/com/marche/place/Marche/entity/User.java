@@ -1,13 +1,12 @@
-// User Entity
 package com.marche.place.Marche.entity;
 
 import com.marche.place.Marche.enums.UserRole;
 import jakarta.persistence.*;
 import lombok.Data;
-import org.joda.time.LocalDateTime;
-
+import java.time.LocalDateTime;  // Utilisez java.time au lieu de org.joda.time
 import java.util.ArrayList;
 import java.util.List;
+
 @Data
 @Entity
 @Table(name = "users")
@@ -38,5 +37,5 @@ public class User {
     private List<Order> orders = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
-    private final LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt = LocalDateTime.now();  // Utilisez java.time.LocalDateTime.now()
 }

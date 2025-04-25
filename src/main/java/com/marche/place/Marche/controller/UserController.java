@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
+@CrossOrigin(origins = "*") // Ajout du CORS pour permettre tous les accès
 @Tag(name = "User Management", description = "Endpoints pour la gestion des utilisateurs")
 public class UserController {
 
@@ -42,5 +43,12 @@ public class UserController {
     @PutMapping("/{id}")
     public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
         return ResponseEntity.ok(userService.updateUser(id, userDto));
+    }
+
+    @Operation(summary = "Supprimer un utilisateur", description = "Supprime un utilisateur existant.")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build();
     }
 }

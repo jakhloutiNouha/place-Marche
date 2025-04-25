@@ -20,6 +20,7 @@ public class Product {
     @Lob
     private String description;
 
+    @Column(name = "image_url")
     private String imageUrl;
 
     @Column(precision = 10, scale = 2, nullable = false)

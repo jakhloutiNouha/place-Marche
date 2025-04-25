@@ -38,18 +38,6 @@ public class StoreService {
         return storeRepository.findByVendorId(vendorId, pageable)
                 .map(this::convertToDto);
     }
-    private LocalDateTime convertJodaToJava(org.joda.time.LocalDateTime jodaTime) {
-        if (jodaTime == null) return null; // ✅ Évite NullPointerException
-
-        return LocalDateTime.of(
-                jodaTime.getYear(),
-                jodaTime.getMonthOfYear(),
-                jodaTime.getDayOfMonth(),
-                jodaTime.getHourOfDay(),
-                jodaTime.getMinuteOfHour(),
-                jodaTime.getSecondOfMinute()
-        );
-    }
 
     private StoreDto convertToDto(Store store) {
         User vendor = store.getVendor();
@@ -65,7 +53,7 @@ public class StoreService {
                                 .email(vendor.getEmail())
                                 .phone(vendor.getPhone())
                                 .role(vendor.getRole())
-                                .createdAt(convertJodaToJava(vendor.getCreatedAt()))  // ✅ Correction
+                                .createdAt(vendor.getCreatedAt())  // Utilisez directement java.time.LocalDateTime
                                 .build()
                 )
                 .createdAt(store.getCreatedAt())
