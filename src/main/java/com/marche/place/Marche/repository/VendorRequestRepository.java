@@ -1,4 +1,3 @@
-// VendorRequestRepository.java
 package com.marche.place.Marche.repository;
 
 import com.marche.place.Marche.entity.VendorRequest;

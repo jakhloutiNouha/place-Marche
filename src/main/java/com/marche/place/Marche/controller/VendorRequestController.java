@@ -1,4 +1,3 @@
-// VendorRequestController.java
 package com.marche.place.Marche.controller;
 
 import com.marche.place.Marche.dto.VendorRequestDto;
@@ -16,7 +15,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/vendor-requests")
 @RequiredArgsConstructor
-@CrossOrigin(origins = "*")
 @Tag(name = "Vendor Requests", description = "Gestion des demandes de vendeurs")
 public class VendorRequestController {
 

@@ -1,11 +1,16 @@
 package com.marche.place.Marche.repository;
 
 import com.marche.place.Marche.entity.Payment;
-import com.marche.place.Marche.enums.PaymentMethod;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import com.marche.place.Marche.enums.PaymentStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
+@Repository
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
-    Page<Payment> findByPaymentMethod(PaymentMethod paymentMethod, Pageable pageable);
+
+    List<Payment> findByOrderId(Long orderId);
+
+    List<Payment> findByStatus(PaymentStatus status);
 }

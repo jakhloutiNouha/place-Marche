@@ -3,18 +3,19 @@ package com.marche.place.Marche.service;
 import com.marche.place.Marche.dto.PromotionDto;
 import com.marche.place.Marche.entity.Product;
 import com.marche.place.Marche.entity.Promotion;
+import com.marche.place.Marche.entity.User;
 import com.marche.place.Marche.enums.DiscountType;
 import com.marche.place.Marche.exception.ResourceNotFoundException;
 import com.marche.place.Marche.repository.ProductRepository;
 import com.marche.place.Marche.repository.PromotionRepository;
+import com.marche.place.Marche.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,6 +26,7 @@ public class PromotionService {
 
     private final PromotionRepository promotionRepository;
     private final ProductRepository productRepository;
+    private final UserRepository userRepository;
 
     public PromotionDto createPromotion(PromotionDto dto) {
         Promotion promotion = new Promotion();
@@ -45,6 +47,34 @@ public class PromotionService {
 
     public List<PromotionDto> getAllPromotions() {
         return promotionRepository.findAll().stream()
+                .map(this::mapToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<PromotionDto> getPromotionsByVendor(String username) {
+        // Trouver l'utilisateur (vendeur) par son nom d'utilisateur (email)
+        User vendor = userRepository.findByEmail(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Vendor not found"));
+
+        // Récupérer tous les produits de ce vendeur en utilisant la méthode existante findByVendor
+        List<Product> vendorProducts = productRepository.findByVendor(vendor);
+
+        if (vendorProducts.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        // Récupérer toutes les promotions
+        List<Promotion> allPromotions = promotionRepository.findAll();
+
+        // Filtrer les promotions qui concernent les produits du vendeur
+        return allPromotions.stream()
+                .filter(promo ->
+                        promo.getProducts().stream()
+                                .anyMatch(product ->
+                                        vendorProducts.stream()
+                                                .anyMatch(vp -> vp.getId().equals(product.getId()))
+                                )
+                )
                 .map(this::mapToDto)
                 .collect(Collectors.toList());
     }

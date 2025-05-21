@@ -1,4 +1,3 @@
-// AuthResponseDto.java
 package com.marche.place.Marche.dto;
 
 import lombok.AllArgsConstructor;
@@ -11,8 +10,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthResponseDto {
+    private Long id;
     private String token;
-    private String role;
     private String email;
     private String fullName;
+    private String role;
 }

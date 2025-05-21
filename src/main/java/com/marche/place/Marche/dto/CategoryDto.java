@@ -1,18 +1,24 @@
 package com.marche.place.Marche.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonInclude;
+import com.marche.place.Marche.entity.Category;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class CategoryDto { // <-- Ajouter 'public'
+@AllArgsConstructor
+public class CategoryDto {
     private Long id;
     private String name;
     private String description;
+    private Long vendorId;
+
+    public CategoryDto(Category category) {
+        this.id = category.getId();
+        this.name = category.getName();
+        this.description = category.getDescription();
+        this.vendorId = category.getVendor() != null ? category.getVendor().getId() : null;
+    }
+
 }

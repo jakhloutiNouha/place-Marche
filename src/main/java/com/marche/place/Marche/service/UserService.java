@@ -20,7 +20,6 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    // UserService.java
     public UserDto createUser(UserDto dto) {
         if(userRepository.existsByEmail(dto.getEmail())) {
             throw new ConflictException("Email déjà utilisé");
@@ -31,7 +30,6 @@ public class UserService {
         user.setEmail(dto.getEmail());
         user.setPassword(generateSimpleHash(dto.getPassword()));
         user.setPhone(dto.getPhone());
-
         // Si aucun rôle n'est spécifié, définir Client par défaut
         user.setRole(dto.getRole() != null ? dto.getRole() : UserRole.Client);
         user.setAddress(dto.getAddress());
@@ -62,21 +60,23 @@ public class UserService {
         user.setFullName(dto.getFullName());
         user.setPhone(dto.getPhone());
         user.setAddress(dto.getAddress());
-        if(dto.getPassword() != null) {
+        if(dto.getPassword() != null && !dto.getPassword().isEmpty()) {
             user.setPassword(generateSimpleHash(dto.getPassword()));
         }
 
         return convertToDto(userRepository.save(user));
     }
 
-    public void deleteUser(Long id) {
+    public boolean deleteUser(Long id) {
         if (!userRepository.existsById(id)) {
             throw new ResourceNotFoundException("Utilisateur non trouvé");
         }
         userRepository.deleteById(id);
+        return true;
     }
 
-    private UserDto convertToDto(User user) {
+    // Rendre cette méthode publique pour utilisation dans les contrôleurs
+    public UserDto convertToDto(User user) {
         return UserDto.builder()
                 .id(user.getId())
                 .fullName(user.getFullName())
@@ -85,6 +85,7 @@ public class UserService {
                 .address(user.getAddress())
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
+                .imageUrl(user.getImageUrl())
                 .build();
     }
 }

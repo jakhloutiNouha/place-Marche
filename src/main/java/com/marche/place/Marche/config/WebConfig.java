@@ -1,4 +1,3 @@
-// WebConfig.java
 package com.marche.place.Marche.config;
 
 import org.springframework.context.annotation.Configuration;

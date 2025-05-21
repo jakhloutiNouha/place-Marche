@@ -3,58 +3,74 @@ package com.marche.place.Marche.service;
 import com.marche.place.Marche.dto.PaymentDto;
 import com.marche.place.Marche.entity.Order;
 import com.marche.place.Marche.entity.Payment;
+import com.marche.place.Marche.enums.OrderStatus;
 import com.marche.place.Marche.enums.PaymentMethod;
 import com.marche.place.Marche.enums.PaymentStatus;
-import com.marche.place.Marche.exception.ResourceNotFoundException;
 import com.marche.place.Marche.repository.OrderRepository;
 import com.marche.place.Marche.repository.PaymentRepository;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.NoSuchElementException;
 
 @Service
-@RequiredArgsConstructor
-@Transactional
 public class PaymentService {
 
-    private final PaymentRepository paymentRepository;
-    private final OrderRepository orderRepository;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
-    public PaymentDto createPayment(PaymentDto dto) {
-        Order order = orderRepository.findById(dto.getOrderId())
-                .orElseThrow(() -> new ResourceNotFoundException("Commande non trouvée"));
+    @Autowired
+    private OrderRepository orderRepository;
 
-        Payment payment = Payment.builder()
-                .amount(dto.getAmount())
-                .paymentMethod(dto.getPaymentMethod())  // 🛑 Vérification du nom du champ
-                .status(PaymentStatus.PENDING)
-                .order(order)
-                .build();
+    @Autowired
+    private OrderService orderService;
+
+    @Transactional
+    public PaymentDto processPayment(PaymentDto paymentDto) {
+        // Récupérer la commande associée
+        Order order = orderRepository.findById(paymentDto.getOrderId())
+                .orElseThrow(() -> new NoSuchElementException("Commande non trouvée"));
+
+        // Vérifier que la commande est en attente
+        if (order.getStatus() != OrderStatus.PENDING) {
+            throw new IllegalStateException("Impossible de traiter le paiement pour une commande avec le statut: " + order.getStatus());
+        }
+
+        // Créer et sauvegarder le paiement
+        Payment payment = new Payment();
+        payment.setOrder(order);
+        payment.setAmount(paymentDto.getAmount());
+        payment.setPaymentMethod(paymentDto.getPaymentMethod());
+        payment.setCreatedAt(LocalDateTime.now());
+
+        // Simuler le traitement du paiement (dans un vrai système, ceci serait remplacé par un appel à un service de paiement)
+        boolean paymentSuccess = simulatePaymentProcessing(paymentDto);
+
+        if (paymentSuccess) {
+            payment.setStatus(PaymentStatus.COMPLETED);
+            // Mettre à jour le statut de la commande
+            orderService.updateOrderStatus(order.getId(), OrderStatus.CONFIRMED);
+        } else {
+            payment.setStatus(PaymentStatus.FAILED);
+        }
 
         Payment savedPayment = paymentRepository.save(payment);
         return convertToDto(savedPayment);
     }
 
-    public PaymentDto getPaymentById(Long id) {
-        Payment payment = paymentRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Paiement non trouvé"));
-        return convertToDto(payment);
-    }
-
-    public Page<PaymentDto> getPaymentsByMethod(PaymentMethod method, Pageable pageable) {
-        Page<Payment> payments = paymentRepository.findByPaymentMethod(method, pageable);
-        return payments.map(this::convertToDto);
+    private boolean simulatePaymentProcessing(PaymentDto paymentDto) {
+        // Dans un système réel, cette méthode ferait un appel à une API de paiement
+        // Pour l'exemple, on simule une réussite à 95%
+        return Math.random() < 0.95;
     }
 
     private PaymentDto convertToDto(Payment payment) {
         return PaymentDto.builder()
                 .id(payment.getId())
                 .amount(payment.getAmount())
-                .paymentMethod(payment.getPaymentMethod())  // 🛑 Vérification du nom du champ
+                .paymentMethod(payment.getPaymentMethod())
                 .status(payment.getStatus())
                 .orderId(payment.getOrder().getId())
                 .createdAt(payment.getCreatedAt())

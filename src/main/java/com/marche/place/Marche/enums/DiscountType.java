@@ -1,4 +1,6 @@
 package com.marche.place.Marche.enums;
+
 public enum DiscountType {
-    PERCENTAGE, FIXED_AMOUNT
+    PERCENTAGE,   // Réduction en pourcentage (ex: 20%)
+    FIXED_AMOUNT  // Réduction en montant fixe (ex: 10 DT)
 }

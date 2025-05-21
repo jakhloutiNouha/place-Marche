@@ -7,6 +7,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,10 +28,18 @@ public class PromotionController {
         return promotionService.createPromotion(promotionDto);
     }
 
-    @Operation(summary = "Lister toutes les promotions", description = "Retourne la liste des promotions actives.")
+    @Operation(summary = "Lister toutes les promotions", description = "Retourne la liste des promotions actives. Accessible sans authentification.")
     @GetMapping
     public ResponseEntity<List<PromotionDto>> getAllPromotions() {
         return ResponseEntity.ok(promotionService.getAllPromotions());
+    }
+
+    @Operation(summary = "Lister les promotions du vendeur connecté", description = "Retourne les promotions du vendeur authentifié.")
+    @GetMapping("/vendor")
+    public ResponseEntity<List<PromotionDto>> getVendorPromotions() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        return ResponseEntity.ok(promotionService.getPromotionsByVendor(username));
     }
 
     @Operation(summary = "Obtenir une promotion", description = "Retourne une promotion spécifique par ID.")
@@ -50,4 +60,5 @@ public class PromotionController {
     public void deletePromotion(@PathVariable Long id) {
         promotionService.deletePromotion(id);
     }
+
 }

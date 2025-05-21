@@ -19,6 +19,10 @@ public class Category {
 
     @Lob
     private String description;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "vendor_id")
+    private User vendor;
+
 
     // Correction : relation inverse avec Product
     @OneToMany(mappedBy = "category", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
